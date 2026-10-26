@@ -19,9 +19,13 @@ import {
   adminDeleteCreator,
   adminBulkUpsertCreators,
   adminExportAllCreators,
+  adminUpdateSingleCreatorSubs,
   getStoragePublicUrl,
 } from '../../lib/store.js';
 import { getTheme, toggleTheme } from '../../lib/theme.js';
+import YouTubeSyncModal from './YouTubeSyncModal.jsx';
+import { getYoutubeApiKey } from '../utils/youtubeConfig';
+import { parseYouTubeIdentifier, fetchYouTubeStats } from '../utils/youtubeSync';
 
 // Format relative time: "Registered 2 mins ago / 3 hrs ago / 5 days ago"
 function timeAgo(dateString) {
@@ -120,6 +124,10 @@ export default function AdminPage({ onNavigate }) {
 
   // CSV Import State
   const [csvPreviewModal, setCsvPreviewModal] = useState(null); // { validRows, errors, fileName }
+
+  // YouTube Real-time Subscriber Sync State
+  const [syncModalOpen, setSyncModalOpen] = useState(false);
+  const [singleSyncingId, setSingleSyncingId] = useState(null);
 
   // Theme state
   const [themeState, setThemeState] = useState(() => getTheme());
@@ -379,6 +387,34 @@ export default function AdminPage({ onNavigate }) {
       showNotification(err.message || 'Failed to delete creator.', true);
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Quick Sync Single Channel from YouTube v3 API
+  const handleQuickSyncChannel = async (creator) => {
+    if (!creator) return;
+    try {
+      setSingleSyncingId(creator.id);
+      const activeKey = getYoutubeApiKey();
+      const parsed = parseYouTubeIdentifier(creator.channel_link, creator.name);
+      const stats = await fetchYouTubeStats(parsed, activeKey);
+
+      if (!stats.found) {
+        showNotification(`Could not sync ${creator.name}: ${stats.error || 'Channel not found or deleted on YouTube.'}`, true);
+        return;
+      }
+
+      const realSubs = stats.subscriberCount || 0;
+      await adminUpdateSingleCreatorSubs(creator.id, realSubs, creator.channel_link);
+      showNotification(`Updated @${creator.name} subs: ${formatSubs(creator.subscribers)} → ${formatSubs(realSubs)}!`);
+
+      const res = await adminGetCreatorsList({ page: creatorPage, pageSize: 50, search: creatorSearch });
+      setCreatorsList(res.data);
+      setCreatorTotal(res.count);
+    } catch (err) {
+      showNotification(err.message || 'Error updating subscriber count', true);
+    } finally {
+      setSingleSyncingId(null);
     }
   };
 
@@ -1419,6 +1455,17 @@ export default function AdminPage({ onNavigate }) {
 
               {/* Action Buttons */}
               <div className="flex items-center flex-wrap gap-2">
+                {/* Update Subscribers via YouTube API */}
+                <button
+                  type="button"
+                  onClick={() => setSyncModalOpen(true)}
+                  className="px-3.5 py-2 bg-gradient-to-r from-[#FF3358] to-rose-600 hover:brightness-105 text-white rounded-xl text-xs font-black transition-all flex items-center gap-1.5 cursor-pointer shadow-sm"
+                  title="Update real-time YouTube subscriber counts using YouTube v3 API"
+                >
+                  <span className="text-sm">🔄</span>
+                  <span>Update Subscribers (YouTube API)</span>
+                </button>
+
                 {/* Add One */}
                 <button
                   onClick={() => setCreatorModal('add')}
@@ -1428,7 +1475,7 @@ export default function AdminPage({ onNavigate }) {
                 </button>
 
                 {/* Import CSV */}
-                <label className="px-3 py-2 bg-[#FF3358] hover:brightness-105 text-white rounded-xl text-xs font-black transition-all flex items-center gap-1.5 cursor-pointer shadow-xs">
+                <label className="px-3 py-2 bg-white hover:bg-neutral-50 text-neutral-800 border border-[#EAE3DB] rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shadow-xs">
                   <span>📂 Import CSV</span>
                   <input
                     type="file"
@@ -1526,9 +1573,21 @@ export default function AdminPage({ onNavigate }) {
                             )}
                           </td>
 
-                          {/* Actions: Edit & Delete */}
+                          {/* Actions: Sync, Edit & Delete */}
                           <td className="py-3 px-4 text-right">
                             <div className="flex items-center justify-end gap-1.5">
+                              <button
+                                onClick={() => handleQuickSyncChannel(c)}
+                                disabled={singleSyncingId === c.id}
+                                className="px-2.5 py-1 bg-white hover:bg-neutral-100 border border-[#EAE3DB] text-neutral-800 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1 shadow-2xs disabled:opacity-50"
+                                title="Quick sync real-time subscriber count from YouTube"
+                              >
+                                {singleSyncingId === c.id ? (
+                                  <span className="animate-spin text-neutral-400">⏳</span>
+                                ) : (
+                                  <span>🔄 Sync</span>
+                                )}
+                              </button>
                               <button
                                 onClick={() => setCreatorModal(c)}
                                 className="px-2.5 py-1 bg-white hover:bg-neutral-100 border border-[#EAE3DB] text-neutral-800 rounded-lg text-xs font-bold transition-all cursor-pointer"
@@ -2069,6 +2128,24 @@ export default function AdminPage({ onNavigate }) {
           </div>
         </div>
       )}
+
+      {/* =============================================================== */}
+      {/* MODAL 5: REAL-TIME YOUTUBE SUBSCRIBER SYNC */}
+      {/* =============================================================== */}
+      <YouTubeSyncModal
+        isOpen={syncModalOpen}
+        onClose={() => setSyncModalOpen(false)}
+        onSyncComplete={async () => {
+          try {
+            const res = await adminGetCreatorsList({ page: creatorPage, pageSize: 50, search: creatorSearch });
+            setCreatorsList(res.data);
+            setCreatorTotal(res.count);
+            refreshStats();
+          } catch (e) {
+            console.warn('Sync complete refresh error:', e);
+          }
+        }}
+      />
     </div>
   );
 }
