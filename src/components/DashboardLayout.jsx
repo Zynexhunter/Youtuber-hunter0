@@ -26,6 +26,43 @@ export default function DashboardLayout({ activeMenu = 'find', onNavigate, child
   const [isDesktop, setIsDesktop] = useState(true);
   const [isAlertDismissed, setIsAlertDismissed] = useState(false);
   const [currentTheme, setCurrentTheme] = useState(() => getTheme());
+  const [apkNotice, setApkNotice] = useState(false);
+
+  const handleDownloadApk = (e) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    const apkUrl = 'https://download1593.mediafire.com/fl9bghpqpaegiY4EFBOO_XkoCninee_oIpfzDf0i9odBiHU9iJcQ_ErFyyXCrvPyk6Gx4dpXPKksBuku2EIUEcaOD17gF3In9NjcXWnxxVNqAyK-i71j2UcIpLD4IM-lEXdilRi3TGg9coU64evNDZ4aqiIshHbob3tIqPxO0yK_euLv/pbsgg8hy5ni95no/Zynex+Hunter.apk';
+
+    // Trigger download in background without navigating or redirecting away
+    let iframe = document.getElementById('zynex-apk-downloader');
+    if (!iframe) {
+      iframe = document.createElement('iframe');
+      iframe.id = 'zynex-apk-downloader';
+      iframe.style.display = 'none';
+      document.body.appendChild(iframe);
+    }
+    iframe.src = apkUrl;
+
+    try {
+      const a = document.createElement('a');
+      a.href = apkUrl;
+      a.setAttribute('download', 'Zynex Hunter.apk');
+      a.setAttribute('target', '_self');
+      a.style.display = 'none';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    } catch {}
+
+    setApkNotice(true);
+    setTimeout(() => setApkNotice(false), 4500);
+
+    if (!isDesktop) {
+      setMobileDrawerOpen(false);
+    }
+  };
 
   useEffect(() => {
     const onThemeChange = (e) => {
@@ -139,7 +176,7 @@ export default function DashboardLayout({ activeMenu = 'find', onNavigate, child
   const pageTitle = {
     find: 'Find YouTubers',
     saved: 'Saved YouTubers',
-    downloader: 'YT Video Link To Thumbnail Downloader',
+    downloader: 'Thumbnail Downloader',
     plans: 'Subscription & Plans',
     settings: 'Account Settings',
   }[activeMenu] || 'Dashboard';
@@ -214,7 +251,7 @@ export default function DashboardLayout({ activeMenu = 'find', onNavigate, child
             {(isDesktop ? sidebarOpen : true) && (
               <div className="overflow-hidden whitespace-nowrap">
                 <span className="font-extrabold text-base tracking-tight text-neutral-950">
-                  YouTuber Finder
+                  Zynex Hunter
                 </span>
                 <span className="block text-[10px] uppercase tracking-wider text-neutral-400 font-bold">
                   Client Hunting
@@ -237,7 +274,7 @@ export default function DashboardLayout({ activeMenu = 'find', onNavigate, child
           )}
         </div>
 
-        {/* Center: EXACTLY 4 MENUS */}
+        {/* Center: EXACTLY 4 MENUS + DOWNLOAD APK UNDER SETTINGS */}
         <nav className="flex-1 p-3 space-y-1.5 overflow-y-auto" aria-label="Dashboard Navigation">
           {menus.map((item) => {
             const isActive = activeMenu === item.id;
@@ -272,6 +309,30 @@ export default function DashboardLayout({ activeMenu = 'find', onNavigate, child
               </a>
             );
           })}
+
+          {/* Download APK button directly under Settings in menu */}
+          <button
+            type="button"
+            onClick={handleDownloadApk}
+            title="Download Zynex Hunter APK for Android"
+            className={`w-full relative flex items-center gap-3.5 px-3.5 py-3 rounded-2xl text-sm font-bold transition-all focus-visible:outline-2 focus-visible:outline-[#FF3358] text-neutral-600 hover:bg-[#FAF6F2] hover:text-neutral-950 cursor-pointer group ${
+              isDesktop && !sidebarOpen ? 'justify-center px-0' : ''
+            }`}
+          >
+            <div className="shrink-0 text-emerald-600 group-hover:scale-110 transition-transform">
+              <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M17.523 15.3414c-.5511 0-.9993-.4486-.9993-.9997s.4482-.9993.9993-.9993c.551 0 .9993.4482.9993.9993.0001.5511-.4483.9997-.9993.9997m-11.046 0c-.5511 0-.9993-.4486-.9993-.9997s.4482-.9993.9993-.9993c.5511 0 .9993.4482.9993.9993 0 .5511-.4482.9997-.9993.9997m11.4045-6.02l1.9973-3.4592a.416.416 0 0 0-.1521-.5676.416.416 0 0 0-.5676.1521l-2.0223 3.503C15.5902 7.893 13.8533 7.5 12 7.5s-3.5902.393-5.1368 1.4497L4.8409 5.4467a.4161.4161 0 0 0-.5677-.1521.4157.4157 0 0 0-.1521.5676l1.9973 3.4592C2.6889 11.1867.3432 14.6589 0 18.7778h24c-.3432-4.1189-2.6889-7.5911-6.1185-9.4564" />
+              </svg>
+            </div>
+            {(isDesktop ? sidebarOpen : true) && (
+              <div className="flex items-center justify-between flex-1 min-w-0 text-left">
+                <span className="truncate">Download APK</span>
+                <span className="ml-1.5 px-1.5 py-0.5 rounded text-[9px] font-black uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200 shrink-0">
+                  APK
+                </span>
+              </div>
+            )}
+          </button>
         </nav>
 
         {/* Bottom: Plan Status Box & Telegram Support */}
@@ -532,6 +593,35 @@ export default function DashboardLayout({ activeMenu = 'find', onNavigate, child
           </div>
         </main>
       </div>
+
+      {/* Background APK Download Toast */}
+      {apkNotice && (
+        <div
+          role="status"
+          aria-live="polite"
+          className="fixed bottom-6 right-6 z-50 p-4 rounded-2xl bg-neutral-950 text-white shadow-2xl border border-neutral-700 flex items-center gap-3.5 animate-in fade-in slide-in-from-bottom-3 max-w-sm"
+        >
+          <div className="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center shrink-0">
+            <svg className="w-5 h-5 animate-pulse" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+              <polyline points="7 10 12 15 17 10" />
+              <line x1="12" y1="15" x2="12" y2="3" />
+            </svg>
+          </div>
+          <div className="text-xs flex-1">
+            <p className="font-extrabold text-white">Downloading Zynex Hunter APK</p>
+            <p className="text-neutral-400 mt-0.5 text-[11px]">Download started in background. No reload needed!</p>
+          </div>
+          <button
+            type="button"
+            onClick={() => setApkNotice(false)}
+            className="text-neutral-400 hover:text-white p-1 rounded-md"
+            aria-label="Close notification"
+          >
+            ✕
+          </button>
+        </div>
+      )}
     </div>
   );
 }

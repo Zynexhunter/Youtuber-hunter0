@@ -144,37 +144,29 @@ export default function ThumbnailDownloaderPage({ onNavigate }) {
 
   return (
     <div className="space-y-6 sm:space-y-8 max-w-5xl mx-auto">
-      {/* HEADER */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-[#F0EAE3]">
-        <div>
-          <div className="flex items-center gap-2">
-            <span className="text-[10px] font-black uppercase tracking-wider text-[#FF3358] bg-rose-50 border border-rose-200 px-2.5 py-0.5 rounded-full inline-flex items-center gap-1">
-              <svg className="w-3 h-3 text-[#FF3358]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-              </svg>
-              <span>Subscription Member Tool</span>
+      {/* MINIMAL SLEEK TOP BAR */}
+      <div className="flex items-center justify-between gap-3 pb-2 border-b border-[#F0EAE3]">
+        <div className="flex items-center gap-2">
+          <span className="text-[10px] font-black uppercase tracking-wider text-[#FF3358] bg-rose-50 border border-rose-200 px-2.5 py-1 rounded-full inline-flex items-center gap-1.5">
+            <svg className="w-3 h-3 text-[#FF3358]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+            </svg>
+            <span>Pro Tool</span>
+          </span>
+          {userIsPaid && (
+            <span className="text-[10px] font-black uppercase tracking-wider text-emerald-800 bg-emerald-100 px-2.5 py-1 rounded-full">
+              Active
             </span>
-            {userIsPaid && (
-              <span className="text-[10px] font-black uppercase tracking-wider text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-full">
-                Unlocked
-              </span>
-            )}
-          </div>
-          <h2 className="text-2xl sm:text-3xl font-black text-neutral-950 tracking-tight mt-1">
-            YT Video Link To Thumbnail Downloader
-          </h2>
-          <p className="text-xs sm:text-sm text-neutral-600 font-medium mt-0.5">
-            Download high-resolution YouTube thumbnails in Ultra HD (1080p), High Quality (720p), and Standard sizes.
-          </p>
+          )}
         </div>
 
         {!userIsPaid && (
           <button
             type="button"
             onClick={() => onNavigate && onNavigate('/dashboard/plans')}
-            className="self-start sm:self-center py-2.5 px-4 rounded-xl text-xs font-black text-white bg-[#FF3358] hover:bg-[#FF1F48] shadow-sm transition-all active:scale-95 cursor-pointer flex items-center gap-1.5"
+            className="py-2 px-3.5 rounded-xl text-xs font-black text-white bg-[#FF3358] hover:bg-[#FF1F48] shadow-xs transition-all active:scale-95 cursor-pointer flex items-center gap-1.5"
           >
-            <span>Upgrade to Pro (₹30) →</span>
+            <span>Unlock Pro (₹30) →</span>
           </button>
         )}
       </div>
@@ -194,10 +186,10 @@ export default function ThumbnailDownloaderPage({ onNavigate }) {
               Pro Member Access Only
             </span>
             <h3 className="text-xl sm:text-2xl font-black text-neutral-950">
-              Unlock YT Thumbnail Downloader
+              Thumbnail Downloader
             </h3>
             <p className="text-xs sm:text-sm text-neutral-600 font-medium max-w-md mx-auto mt-1 leading-relaxed">
-              This tool is exclusively available for active subscription members. Extract and download Full HD 1080p, 720p, and SD thumbnails for any YouTube video or Shorts link in 1 click.
+              Extract Ultra HD (1080p), 720p & SD thumbnails from any YouTube video or Shorts link in 1 tap.
             </p>
           </div>
 

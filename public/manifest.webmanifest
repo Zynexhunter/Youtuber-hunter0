@@ -1,7 +1,7 @@
 {
-  "name": "YouTuber Finder",
-  "short_name": "ClientHunt",
-  "description": "Find Client Who Need Work - YouTubers Finder Tool for Video Editors, Thumbnail Designers, Agencies, and Brand Deals.",
+  "name": "Zynex Hunter",
+  "short_name": "Zynex Hunter",
+  "description": "Zynex Hunter - YouTubers Finder & Client Hunting Tool for Video Editors, Thumbnail Designers, Agencies, and Brand Deals.",
   "start_url": "./",
   "scope": "./",
   "display": "browser",

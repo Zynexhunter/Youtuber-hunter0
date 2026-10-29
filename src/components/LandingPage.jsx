@@ -182,13 +182,21 @@ export default function LandingPage({ onNavigate }) {
         <a
           href="#/"
           className="flex items-center gap-3 group focus-visible:outline-2 focus-visible:outline-[#FF3358] rounded-2xl"
-          aria-label="YouTuber Finder Homepage"
+          aria-label="Zynex Hunter Homepage"
         >
           <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-[16px] bg-[#0A0A0A] flex items-center justify-center text-white shadow-md transition-transform group-hover:scale-105">
             <svg className="w-6 h-6" viewBox="0 0 24 24" fill="currentColor">
               <rect x="2" y="2" width="20" height="20" rx="6" />
               <circle cx="12" cy="12" r="4.5" fill="#FAF6F2" />
             </svg>
+          </div>
+          <div className="flex flex-col text-left">
+            <span className="font-extrabold text-base sm:text-lg tracking-tight text-neutral-950">
+              Zynex Hunter
+            </span>
+            <span className="text-[10px] uppercase font-bold tracking-wider text-neutral-400">
+              Client Hunting Tool
+            </span>
           </div>
         </a>
 
@@ -319,7 +327,7 @@ export default function LandingPage({ onNavigate }) {
 
               {/* Sub-headline */}
               <h2 className="text-2xl sm:text-3xl font-extrabold text-neutral-950 mt-5 tracking-tight">
-                YouTubers Finder Tool
+                Zynex Hunter — YouTubers Finder Tool
               </h2>
             </div>
 
@@ -1164,7 +1172,7 @@ export default function LandingPage({ onNavigate }) {
                 <circle cx="12" cy="12" r="4.5" fill="#FAF6F2" />
               </svg>
             </div>
-            <span className="font-extrabold text-neutral-950 text-sm">YouTuber Finder</span>
+            <span className="font-extrabold text-neutral-950 text-sm">Zynex Hunter</span>
           </div>
 
           <div className="flex items-center gap-6">
@@ -1176,7 +1184,7 @@ export default function LandingPage({ onNavigate }) {
           </div>
 
           <div>
-            © {new Date().getFullYear()} YouTuber Finder. Client Hunting Tool for Creators & Editors.
+            © {new Date().getFullYear()} Zynex Hunter. Client Hunting Tool for Creators & Editors.
           </div>
         </div>
       </footer>
