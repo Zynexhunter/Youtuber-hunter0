@@ -8,6 +8,7 @@ import React, { useState, useEffect } from 'react';
 import { CREATORS, NICHES, COUNTRIES, RANGES } from '../../lib/data.js';
 import { isPaid, savedIds, toggleSave, subscribeStore, getLiveCreators } from '../../lib/store.js';
 import CreatorCard from '../../lib/CreatorCard.js';
+import TutorialCard from './TutorialCard.jsx';
 import { initScrollReveal } from '../../lib/scrollReveal.js';
 
 export default function FindPage({ onNavigate }) {
@@ -25,6 +26,65 @@ export default function FindPage({ onNavigate }) {
   const [userIsPaid, setUserIsPaid] = useState(() => isPaid());
   const [savedList, setSavedList] = useState(() => (Array.isArray(savedIds()) ? savedIds() : []));
   const [creatorsList, setCreatorsList] = useState(CREATORS);
+  const [showTutorialCard, setShowTutorialCard] = useState(() => {
+    try {
+      if (localStorage.getItem('zynex_tutorial_card_hidden') === 'true') return false;
+      const clickedAtRaw = localStorage.getItem('zynex_tutorial_card_clicked_at');
+      if (clickedAtRaw) {
+        const clickedAt = Number(clickedAtRaw);
+        if (!Number.isNaN(clickedAt) && Date.now() - clickedAt > 60000) {
+          localStorage.setItem('zynex_tutorial_card_hidden', 'true');
+          localStorage.removeItem('zynex_tutorial_card_clicked_at');
+          return false;
+        }
+      }
+      return true;
+    } catch {
+      return true;
+    }
+  });
+
+  const handleTutorialCardClick = () => {
+    try {
+      localStorage.setItem('zynex_tutorial_card_clicked_at', String(Date.now()));
+    } catch {}
+  };
+
+  useEffect(() => {
+    const checkTutorialReturn = () => {
+      try {
+        if (localStorage.getItem('zynex_tutorial_card_hidden') === 'true') {
+          setShowTutorialCard(false);
+          return;
+        }
+        const clickedAtRaw = localStorage.getItem('zynex_tutorial_card_clicked_at');
+        if (!clickedAtRaw) return;
+        const clickedAt = Number(clickedAtRaw);
+        if (!Number.isNaN(clickedAt) && Date.now() - clickedAt > 60000) {
+          localStorage.setItem('zynex_tutorial_card_hidden', 'true');
+          localStorage.removeItem('zynex_tutorial_card_clicked_at');
+          setShowTutorialCard(false);
+        }
+      } catch {}
+    };
+
+    const onVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        checkTutorialReturn();
+      }
+    };
+
+    checkTutorialReturn();
+    document.addEventListener('visibilitychange', onVisibilityChange);
+    window.addEventListener('focus', checkTutorialReturn);
+    window.addEventListener('pageshow', checkTutorialReturn);
+
+    return () => {
+      document.removeEventListener('visibilitychange', onVisibilityChange);
+      window.removeEventListener('focus', checkTutorialReturn);
+      window.removeEventListener('pageshow', checkTutorialReturn);
+    };
+  }, []);
 
   useEffect(() => {
     let mounted = true;
@@ -264,6 +324,7 @@ export default function FindPage({ onNavigate }) {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+          {showTutorialCard && <TutorialCard onTutorialClick={handleTutorialCardClick} />}
           {filteredCreators.map((creator, index) => (
             <CreatorCard
               key={creator.id}
