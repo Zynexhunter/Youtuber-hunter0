@@ -9,6 +9,7 @@
 import React, { useState, useEffect } from 'react';
 import { me, isPaid, plan, rejectedNotice, subscribeStore } from '../../lib/store.js';
 import { getTheme, toggleTheme } from '../../lib/theme.js';
+import TutorialPopup from './TutorialPopup.jsx';
 
 export default function DashboardLayout({ activeMenu = 'find', onNavigate, children }) {
   const [currentUser, setCurrentUser] = useState(() => me() || {
@@ -27,6 +28,24 @@ export default function DashboardLayout({ activeMenu = 'find', onNavigate, child
   const [isAlertDismissed, setIsAlertDismissed] = useState(false);
   const [currentTheme, setCurrentTheme] = useState(() => getTheme());
   const [apkNotice, setApkNotice] = useState(false);
+  const [showTutorialPopup, setShowTutorialPopup] = useState(false);
+
+  // Show TutorialPopup once immediately after login or signup
+  useEffect(() => {
+    try {
+      const fromStorage = sessionStorage.getItem('zynex_pending_tutorial_popup') === '1';
+      const fromWindow = typeof window !== 'undefined' && Boolean(window.__zynexPendingTutorial);
+      if (fromStorage || fromWindow) {
+        try {
+          sessionStorage.removeItem('zynex_pending_tutorial_popup');
+        } catch {}
+        if (typeof window !== 'undefined') {
+          window.__zynexPendingTutorial = false;
+        }
+        setShowTutorialPopup(true);
+      }
+    } catch {}
+  }, [currentUser?.id]);
 
   const handleDownloadApk = (e) => {
     if (e) {
@@ -622,6 +641,12 @@ export default function DashboardLayout({ activeMenu = 'find', onNavigate, child
           </button>
         </div>
       )}
+
+      {/* Tutorial Popup after Login / Sign Up */}
+      <TutorialPopup
+        isOpen={showTutorialPopup}
+        onClose={() => setShowTutorialPopup(false)}
+      />
     </div>
   );
 }

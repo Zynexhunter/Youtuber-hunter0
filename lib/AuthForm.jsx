@@ -20,6 +20,15 @@ export default function AuthForm({ mode = 'login', onNavigate }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showLoader, setShowLoader] = useState(false);
 
+  const triggerTutorialPopupFlag = () => {
+    try {
+      sessionStorage.setItem('zynex_pending_tutorial_popup', '1');
+    } catch {}
+    if (typeof window !== 'undefined') {
+      window.__zynexPendingTutorial = true;
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
@@ -36,6 +45,7 @@ export default function AuthForm({ mode = 'login', onNavigate }) {
         if (err) {
           setError(err);
         } else {
+          triggerTutorialPopupFlag();
           setShowLoader(true);
         }
       } catch (e) {
@@ -54,6 +64,7 @@ export default function AuthForm({ mode = 'login', onNavigate }) {
         if (err) {
           setError(err);
         } else {
+          triggerTutorialPopupFlag();
           setShowLoader(true);
         }
       } catch (e) {
